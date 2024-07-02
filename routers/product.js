@@ -10,12 +10,12 @@ var storage = multer.diskStorage({
         cb(null, 'public/uploads');
     },
     filename: function (req, file, cb) {
-        const fileName = file.originalname.split(' ').json('-');
-        cb(null, fileName + '-' + Date.now());
+        const fileName = file.originalname.replace('')
+        cb(null, file.fieldname + '-' + uniqueSuffix());
     }
 });
 
-const upload = multer({ storage: storage });
+var upload = multer({ storage: storage });
 
 router.get('/', async (req, res) => {
     let filter = {};
