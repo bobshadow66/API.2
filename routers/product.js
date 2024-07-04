@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { Product } = require('../models/product');
-const { Category } = require('../models/category'); // Assuming you have a Category model
+const { Category } = require('../models/category'); 
 const mongoose = require('mongoose');
 const multer = require('multer');
 
@@ -10,12 +10,12 @@ var storage = multer.diskStorage({
         cb(null, 'public/uploads');
     },
     filename: function (req, file, cb) {
-        const fileName = file.originalname.replace('')
-        cb(null, file.fieldname + '-' + uniqueSuffix());
+        const fileName = file.originalname.replace(/\s+/g, '-');
+        cb(null, fileName + '-' + Date.now());
     }
 });
 
-var upload = multer({ storage: storage });
+const uploadOptions = multer({ storage: storage });
 
 router.get('/', async (req, res) => {
     let filter = {};
@@ -46,10 +46,13 @@ router.get('/:id', async (req, res) => {
     }
 });
 
-router.post('/', upload.single('image'), async (req, res) => {
+router.post('/', uploadOptions.single('image'), async (req, res) => {
     try {
         const category = await Category.findById(req.body.category);
         if (!category) return res.status(400).send('Invalid Category');
+        
+        const fileName = req.file.filename;
+        const basePath = `${req.protocol}://${req.get('host')}/public/uploads/`;
 
         let product = new Product({
             name: req.body.name,
@@ -62,7 +65,7 @@ router.post('/', upload.single('image'), async (req, res) => {
             numReviews: req.body.numReviews,
             countInStock: req.body.countInStock,
             isFeatured: req.body.isFeatured,
-            image: req.file ? req.file.path : ''
+            image: `${basePath}${fileName}`
         });
 
         product = await product.save();
@@ -156,6 +159,7 @@ router.get('/get/featured/:count', async (req, res) => {
 });
 
 module.exports = router;
+
 
 
 
