@@ -1,7 +1,7 @@
-const { Category } = require('../models/category');
+const { Category } = require('../models/categories');
 const express = require('express');
 const router = express.Router();
-const bcrypt =require(bycrpt.js)
+const bcrypt =require('bcryptjs'); 
 
 router.get('/', async (req, res) => {
     try {
