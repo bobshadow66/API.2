@@ -1,3 +1,10 @@
+/*
+router/product.js
+Name: Aiden Salinas
+Date: 07/04/2024
+Description: Products model.
+*/
+
 // Libs
 const express = require('express');
 const router = express.Router();
