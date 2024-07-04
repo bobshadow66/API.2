@@ -5,13 +5,27 @@ const { Category } = require('../models/category');
 const mongoose = require('mongoose');
 const multer = require('multer');
 
-var storage = multer.diskStorage({
+const FILE_TYPE_MAP = {
+    'image/png': 'png',
+    'image/jpeg': 'png',
+    'image/jpg': 'png'
+}
+
+const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, 'public/uploads');
+          const isValid = FILE_TYPE_MAP[file.mimetype];
+          let uploadError = new Error('invalid image type');
+
+          if(isValid) {
+             uplaodError = null
+          }
+        cb(uploadError, 'public/uploads');
     },
     filename: function (req, file, cb) {
+           
         const fileName = file.originalname.replace(/\s+/g, '-');
-        cb(null, fileName + '-' + Date.now());
+        const extension = FILE_TYPE_MAP[file.mimetype]
+        cb(null, '${filename}-${Date.now{}}.${extension}')
     }
 });
 
@@ -50,6 +64,9 @@ router.post('/', uploadOptions.single('image'), async (req, res) => {
     try {
         const category = await Category.findById(req.body.category);
         if (!category) return res.status(400).send('Invalid Category');
+        
+        const file = req.file;
+        if(!file) return res.status(400).send('Invalid Category')
         
         const fileName = req.file.filename;
         const basePath = `${req.protocol}://${req.get('host')}/public/uploads/`;
@@ -157,6 +174,39 @@ router.get('/get/featured/:count', async (req, res) => {
         res.status(500).json({ success: false, error: err });
     }
 });
+
+    router.put('/gallery-images/:id', uploadOptions.array('images', 10), async (req, res) => {
+        if (!mongoose.isValidObjectId(req.params.id)) {
+            return res.status(400).send('Invalid Product Id');
+        }
+    
+        try {
+            const files = req.files;
+            let imagesPaths = [];
+            const basePath = `${req.protocol}://${req.get('host')}/public/uploads/`;
+            if (files) {
+                files.map(file => {
+                    imagesPaths.push(`${basePath}${file.filename}`);
+                });
+            }
+    
+            const product = await Product.findByIdAndUpdate(
+                req.params.id,
+                {
+                    images: imagesPaths
+                },
+                { new: true }
+            );
+    
+            if (!product) {
+                return res.status(500).send('The product cannot be updated!');
+            }
+    
+            res.send(product);
+        } catch (err) {
+            res.status(500).json({ success: false, error: err });
+        }
+    });
 
 module.exports = router;
 
