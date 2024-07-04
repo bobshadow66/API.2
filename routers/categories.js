@@ -1,7 +1,18 @@
-const { Category } = require('../models/categories');
+/*
+routers/categories.js
+Name: Aiden Salinas
+Date: 07/04/2024
+Description: Categories router
+*/
+
+// Libs
 const express = require('express');
 const router = express.Router();
 const bcrypt =require('bcryptjs'); 
+
+// Models
+const { Category } = require('../models/category');
+
 
 router.get('/', async (req, res) => {
     try {

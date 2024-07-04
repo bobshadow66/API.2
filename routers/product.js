@@ -13,7 +13,7 @@ const multer = require('multer');
 
 // Models
 const { Product } = require('../models/product');
-const { Category } = require('../models/categories'); 
+const { Category } = require('../models/category'); 
 
 const FILE_TYPE_MAP = {
     'image/png': 'png',
