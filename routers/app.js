@@ -1,22 +1,22 @@
-//Libs
+// Libs
 const express = require('express');
 const app = express();
-const bodyParser = require('body-parser'); 
-const morgan = require('morgan'); 
-const mongoose = require('mongoose'); 
+const bodyParser = require('body-parser');
+const morgan = require('morgan');
+const mongoose = require('mongoose');
 const cors = require('cors');
 require('dotenv/config');
 const authJwt = require('./helpers/jwt');
-const errorHandler = require('./helpers/error-handler')
-app.use(cors());
-app.options('*', cors());
+const errorHandler = require('./helpers/error-handler');
 
 // Middleware
+app.use(cors());
+app.options('*', cors());
 app.use(bodyParser.json());
 app.use(morgan('tiny'));
 app.use(authJwt());
-app.use('/public/uplodads', express.static(__dirname + 'public/uploads'));
-app.use(errorHandler )
+app.use('/public/uploads', express.static(__dirname + '/public/uploads'));
+app.use(errorHandler);
 
 // Routes
 const categoriesRoutes = require('./routes/categories');
@@ -26,12 +26,12 @@ const ordersRoutes = require('./routes/orders');
 
 const api = process.env.API_URL;
 
-app.use('/categories', categoriesRoutes);
-app.use('/products', productsRoutes);
-app.use('/users', usersRoutes);
-app.use('${api}/orders', ordersRoutes);
+app.use(`${api}/categories`, categoriesRoutes);
+app.use(`${api}/products`, productsRoutes);
+app.use(`${api}/users`, usersRoutes);
+app.use(`${api}/orders`, ordersRoutes);
 
-//Database
+// Database
 mongoose.connect(process.env.CONNECTION_STRING, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
@@ -42,4 +42,10 @@ mongoose.connect(process.env.CONNECTION_STRING, {
 })
 .catch((err) => {
     console.log(err);
+});
+
+// Server
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
 });

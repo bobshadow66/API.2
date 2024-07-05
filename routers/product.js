@@ -17,26 +17,25 @@ const { Category } = require('../models/category');
 
 const FILE_TYPE_MAP = {
     'image/png': 'png',
-    'image/jpeg': 'png',
-    'image/jpg': 'png'
-}
+    'image/jpeg': 'jpeg',
+    'image/jpg': 'jpg'
+};
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         const isValid = FILE_TYPE_MAP[file.mimetype];
         let uploadError = new Error('invalid image type');
 
-        if(isValid) {
-            uplaodError = null
+        if (isValid) {
+            uploadError = null;
         }
 
         cb(uploadError, 'public/uploads');
     },
     filename: function (req, file, cb) {
-           
         const fileName = file.originalname.replace(/\s+/g, '-');
-        const extension = FILE_TYPE_MAP[file.mimetype]
-        cb(null, '${filename}-${Date.now{}}.${extension}')
+        const extension = FILE_TYPE_MAP[file.mimetype];
+        cb(null, `${fileName}-${Date.now()}.${extension}`);
     }
 });
 
@@ -83,7 +82,7 @@ router.post('/', uploadOptions.single('image'), async (req, res) => {
         if (!category) return res.status(400).send('Invalid Category');
         
         const file = req.file;
-        if(!file) return res.status(400).send('Invalid Category')
+        if (!file) return res.status(400).send('No image in the request');
         
         const fileName = req.file.filename;
         const basePath = `${req.protocol}://${req.get('host')}/public/uploads/`;
@@ -170,9 +169,7 @@ router.get('/get/count', async (req, res) => {
         if (!productCount) {
             return res.status(500).json({ success: false });
         }
-        res.send({
-            productCount: productCount
-        });
+        res.send({ productCount: productCount });
     } catch (err) {
         res.status(500).json({ success: false, error: err });
     }

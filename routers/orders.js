@@ -3,6 +3,7 @@ const { Order } = require('../models/order');
 const { OrderItem } = require('../models/order-item'); 
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose');
 
 // Get, Put, Post, and Delete requests for Orders
 
@@ -18,8 +19,11 @@ router.get('/', async (req, res) => {
     }
 });
 
-
 router.get('/:id', async (req, res) => {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+        return res.status(400).send('Invalid Order Id');
+    }
+
     try {
         const order = await Order.findById(req.params.id)
             .populate('user', 'name')
@@ -36,7 +40,6 @@ router.get('/:id', async (req, res) => {
         res.status(500).json({ success: false, error: err });
     }
 });
-
 
 router.post('/', async (req, res) => {
     try {
@@ -82,8 +85,11 @@ router.post('/', async (req, res) => {
     }
 });
 
-
 router.put('/:id', async (req, res) => {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+        return res.status(400).send('Invalid Order Id');
+    }
+
     try {
         const order = await Order.findByIdAndUpdate(
             req.params.id,
@@ -102,8 +108,11 @@ router.put('/:id', async (req, res) => {
     }
 });
 
-
 router.delete('/:id', async (req, res) => {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+        return res.status(400).send('Invalid Order Id');
+    }
+
     try {
         const order = await Order.findByIdAndRemove(req.params.id);
         if (order) {
@@ -119,14 +128,13 @@ router.delete('/:id', async (req, res) => {
     }
 });
 
-
 router.get('/get/totalsales', async (req, res) => {
     try {
         const totalSales = await Order.aggregate([
             { $group: { _id: null, totalsales: { $sum: '$totalPrice' } } }
         ]);
 
-        if (!totalSales) {
+        if (!totalSales.length) {
             return res.status(400).send('The order sales cannot be generated');
         }
 
@@ -136,7 +144,6 @@ router.get('/get/totalsales', async (req, res) => {
     }
 });
 
-
 router.get('/get/count', async (req, res) => {
     try {
         const orderCount = await Order.countDocuments();
@@ -144,15 +151,17 @@ router.get('/get/count', async (req, res) => {
         if (!orderCount) {
             return res.status(500).json({ success: false });
         }
-        res.send({
-            orderCount: orderCount
-        });
+        res.send({ orderCount: orderCount });
     } catch (err) {
         res.status(500).json({ success: false, error: err });
     }
 });
 
 router.get('/get/userorders/:userid', async (req, res) => {
+    if (!mongoose.isValidObjectId(req.params.userid)) {
+        return res.status(400).send('Invalid User Id');
+    }
+
     try {
         const userOrderList = await Order.find({ user: req.params.userid })
             .populate({
@@ -172,3 +181,4 @@ router.get('/get/userorders/:userid', async (req, res) => {
 });
 
 module.exports = router;
+

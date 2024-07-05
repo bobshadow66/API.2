@@ -8,11 +8,10 @@ Description: Categories router
 // Libs
 const express = require('express');
 const router = express.Router();
-const bcrypt =require('bcryptjs'); 
+const mongoose = require('mongoose');
 
 // Models
 const { Category } = require('../models/category');
-
 
 router.get('/', async (req, res) => {
     try {
@@ -27,6 +26,10 @@ router.get('/', async (req, res) => {
 });
 
 router.get('/:id', async (req, res) => {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+        return res.status(400).send('Invalid Category Id');
+    }
+
     try {
         const category = await Category.findById(req.params.id);
         if (!category) {
@@ -56,6 +59,10 @@ router.post('/', async (req, res) => {
 });
 
 router.put('/:id', async (req, res) => {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+        return res.status(400).send('Invalid Category Id');
+    }
+
     try {
         const category = await Category.findByIdAndUpdate(
             req.params.id,
@@ -77,6 +84,10 @@ router.put('/:id', async (req, res) => {
 });
 
 router.delete('/:id', async (req, res) => {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+        return res.status(400).send('Invalid Category Id');
+    }
+
     try {
         const category = await Category.findByIdAndRemove(req.params.id);
         if (!category) {
@@ -84,8 +95,9 @@ router.delete('/:id', async (req, res) => {
         }
         res.status(200).json({ success: true, message: 'The category is deleted' });
     } catch (err) {
-        res.status(400).json({ success: false, error: err });
+        res.status(500).json({ success: false, error: err });
     }
 });
 
 module.exports = router;
+

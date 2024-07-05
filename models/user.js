@@ -9,7 +9,7 @@ const userSchema = new mongoose.Schema({
         type: String, 
         required: true,
     },
-    PasswordHash: {
+    passwordHash: { // Corrected case
         type: String,
         required: true,
     },
@@ -23,33 +23,32 @@ const userSchema = new mongoose.Schema({
     },
     street: {
         type: String,
-        deafult: ''
+        default: '', // Corrected typo
     },
     apartment: {
         type: String,
-        deafult: ''
+        default: '', // Corrected typo
     },
     zip: {
         type: String,
-        default: ''
+        default: '',
     },
     city: {
         type: String,
-        default: ''
+        default: '',
     },
     country: {
         type: String,
-        default: ''
+        default: '',
     }
 });
 
-productSchema.virtual('id').get(function () {
+userSchema.virtual('id').get(function () {
     return this._id.toHexString();
-})
+});
 
-productSchema.set('toJSON', {
+userSchema.set('toJSON', {
     virtuals: true,
 });
 
-exports.User = mongoose.model('User', userSchema);
-exports.userSchema = userSchema;
+module.exports = mongoose.model('User', userSchema);
