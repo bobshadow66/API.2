@@ -1,8 +1,10 @@
+// Libs
 const { Order } = require('../models/order');
 const { OrderItem } = require('../models/order-item'); 
 const express = require('express');
 const router = express.Router();
 
+// Get, Put, Post, and Delete requests for Orders
 
 router.get('/', async (req, res) => {
     try {

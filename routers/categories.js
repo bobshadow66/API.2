@@ -1,8 +1,18 @@
+/**
+  Name: Aiden
+  Date: 7/04/24
+  
+ 
+ */
+
+// Libs
 const { Category } = require('../models/categories');
 const express = require('express');
 const router = express.Router();
 const bcrypt =require('bcryptjs'); 
 
+
+// Get, Post, Put, and Delete requests for Categories
 router.get('/', async (req, res) => {
     try {
         const categoryList = await Category.find();
