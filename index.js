@@ -15,7 +15,7 @@ const api = process.env.API_URL;
 
 // Routers
 const productsRouter = require('./routers/product');
-const categoriesRouter = require('./routers/category');
+const categoriesRouter = require('./routers/categories');
 app.use(`${api}/products`, productsRouter);
 app.use(`${api}/categories`, categoriesRouter);
 

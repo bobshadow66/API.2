@@ -1,18 +1,19 @@
-/**
-  Name: Aiden
-  Date: 7/04/24
-  
- 
- */
+/*
+routers/categories.js
+Name: Aiden Salinas
+Date: 07/04/2024
+Description: Categories router
+*/
 
 // Libs
-const { Category } = require('../models/categories');
 const express = require('express');
 const router = express.Router();
 const bcrypt =require('bcryptjs'); 
 
+// Models
+const { Category } = require('../models/category');
 
-// Get, Post, Put, and Delete requests for Categories
+
 router.get('/', async (req, res) => {
     try {
         const categoryList = await Category.find();
