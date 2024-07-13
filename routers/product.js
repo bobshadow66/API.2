@@ -10,6 +10,9 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const multer = require('multer');
+const productsRoutes = require('./routes/product');
+app.use('/api/v1/products', productRoutes);
+
 
 // Models
 const { Product } = require('../models/product');

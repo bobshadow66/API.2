@@ -4,6 +4,9 @@ const { OrderItem } = require('../models/order-item');
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
+const productsRoutes = require('./routes/orders');
+app.use('/api/v1/products', ordersRoutes);
+
 
 // Get, Put, Post, and Delete requests for Orders
 
