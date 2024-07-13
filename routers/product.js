@@ -10,13 +10,13 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const multer = require('multer');
-const productsRoutes = require('./routes/product');
-app.use('/api/v1/products', productRoutes);
+
 
 
 // Models
 const { Product } = require('../models/product');
 const { Category } = require('../models/category'); 
+const { Order } = require('../models/order'); 
 
 const FILE_TYPE_MAP = {
     'image/png': 'png',
@@ -79,16 +79,32 @@ router.get('/:id', async (req, res) => {
     }
 });
 
+router.get('/:id', async (req, res) => {
+    try {
+        const order = await Product.findById(req.params.id).populate('order');
+
+        if (!order) {
+            return res.status(500).json({ success: false });
+        }
+
+        res.send(order);
+    } catch (err) {
+        res.status(500).json({ success: false, error: err });
+    }
+});
+
+
+
 router.post('/', uploadOptions.single('image'), async (req, res) => {
     try {
         const category = await Category.findById(req.body.category);
         if (!category) return res.status(400).send('Invalid Category');
         
-        const file = req.file;
-        if (!file) return res.status(400).send('No image in the request');
+        //const file = req.file;
+        //if (!file) return res.status(400).send('No image in the request');
         
-        const fileName = req.file.filename;
-        const basePath = `${req.protocol}://${req.get('host')}/public/uploads/`;
+        //const fileName = req.file.filename;
+        //const basePath = `${req.protocol}://${req.get('host')}/public/uploads/`;
 
         let product = new Product({
             name: req.body.name,
@@ -101,7 +117,7 @@ router.post('/', uploadOptions.single('image'), async (req, res) => {
             numReviews: req.body.numReviews,
             countInStock: req.body.countInStock,
             isFeatured: req.body.isFeatured,
-            image: `${basePath}${fileName}`
+            //image: `${basePath}${fileName}`
         });
 
         product = await product.save();
@@ -114,7 +130,7 @@ router.post('/', uploadOptions.single('image'), async (req, res) => {
     } catch (err) {
         res.status(500).json({ success: false, error: err });
     }
-});
+}); 
 
 router.put('/:id', async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
@@ -137,7 +153,7 @@ router.put('/:id', async (req, res) => {
                 rating: req.body.rating,
                 numReviews: req.body.numReviews,
                 countInStock: req.body.countInStock,
-                isFeatured: req.body.isFeatured,
+                isFeatured: req.body.isFeatured
             },
             { new: true }
         );

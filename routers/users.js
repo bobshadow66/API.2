@@ -1,19 +1,19 @@
 const { User } = require('../models/user');
 const express = require('express');
 const bcrypt = require('bcryptjs');
-const router = express.Router();
 const jwt = require('jsonwebtoken');
+const router = express.Router();
 
 // Get all users
 router.get('/', async (req, res) => {
     try {
-        const userList = await User.find().select('-passwordHash');
-        if (!userList.length) {
+        const userList = await User?.find().select('-passwordHash') || [];
+        if (userList.length === 0) {
             return res.status(404).json({ success: false, message: 'No users found' });
         }
         res.status(200).send(userList);
     } catch (err) {
-        res.status(500).json({ success: false, error: err });
+        res.status(500).json({ success: false, error: err.message });
     }
 });
 
@@ -26,14 +26,14 @@ router.get('/:id', async (req, res) => {
         }
         res.status(200).send(user);
     } catch (err) {
-        res.status(500).json({ success: false, error: err });
+        res.status(500).json({ success: false, error: err.message });
     }
 });
 
 // Create a new user
 router.post('/', async (req, res) => {
     try {
-        let user = new User({
+        const user = new User({
             name: req.body.name,
             email: req.body.email,
             passwordHash: bcrypt.hashSync(req.body.password, 10),
@@ -45,13 +45,10 @@ router.post('/', async (req, res) => {
             city: req.body.city,
             country: req.body.country
         });
-        user = await user.save();
-        if (!user) {
-            return res.status(400).send('The user cannot be created!');
-        }
-        res.status(201).send(user);
+        const savedUser = await user.save();
+        res.status(201).send(savedUser);
     } catch (err) {
-        res.status(500).json({ success: false, error: err });
+        res.status(400).json({ success: false, error: err.message });
     }
 });
 
@@ -59,12 +56,11 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
     try {
         const userExist = await User.findById(req.params.id);
-        let newPassword;
-        if (req.body.password) {
-            newPassword = bcrypt.hashSync(req.body.password, 10);
-        } else {
-            newPassword = userExist.passwordHash;
+        if (!userExist) {
+            return res.status(404).json({ success: false, message: 'User not found!' });
         }
+
+        const newPassword = req.body.password ? bcrypt.hashSync(req.body.password, 10) : userExist.passwordHash;
 
         const user = await User.findByIdAndUpdate(
             req.params.id,
@@ -83,11 +79,13 @@ router.put('/:id', async (req, res) => {
             { new: true }
         );
 
-        if (!user) return res.status(400).send('The user cannot be updated!');
+        if (!user) {
+            return res.status(400).send('The user cannot be updated!');
+        }
 
         res.send(user);
     } catch (err) {
-        res.status(500).json({ success: false, error: err });
+        res.status(500).json({ success: false, error: err.message });
     }
 });
 
@@ -108,17 +106,17 @@ router.post('/login', async (req, res) => {
 
             return res.status(200).send({ user: user.email, token: token });
         } else {
-            return res.status(400).send('Invalid password');
+            return res.status(400).send('Invalid email or password');
         }
     } catch (err) {
-        res.status(500).json({ success: false, error: err });
+        res.status(500).json({ success: false, error: err.message });
     }
 });
 
 // Register a new user
 router.post('/register', async (req, res) => {
     try {
-        let user = new User({
+        const user = new User({
             name: req.body.name,
             email: req.body.email,
             passwordHash: bcrypt.hashSync(req.body.password, 10),
@@ -131,15 +129,10 @@ router.post('/register', async (req, res) => {
             country: req.body.country
         });
 
-        user = await user.save();
-
-        if (!user) {
-            return res.status(400).send('The user cannot be created');
-        }
-
-        res.send(user);
+        const savedUser = await user.save();
+        res.send(savedUser);
     } catch (err) {
-        res.status(500).json({ success: false, error: err });
+        res.status(400).json({ success: false, error: err.message });
     }
 });
 
@@ -149,12 +142,12 @@ router.get('/get/count', async (req, res) => {
         const userCount = await User.countDocuments();
 
         if (userCount === 0) {
-            return res.status(500).json({ success: false });
+            return res.status(404).json({ success: false, message: 'No users found' });
         }
 
         res.send({ userCount: userCount });
     } catch (err) {
-        res.status(500).json({ success: false, error: err });
+        res.status(500).json({ success: false, error: err.message });
     }
 });
 
@@ -162,13 +155,12 @@ router.get('/get/count', async (req, res) => {
 router.delete('/:id', async (req, res) => {
     try {
         const user = await User.findByIdAndRemove(req.params.id);
-        if (user) {
-            return res.status(200).json({ success: true, message: 'The user is deleted' });
-        } else {
+        if (!user) {
             return res.status(404).json({ success: false, message: 'User not found' });
         }
+        res.status(200).json({ success: true, message: 'The user is deleted' });
     } catch (err) {
-        return res.status(500).json({ success: false, error: err });
+        res.status(500).json({ success: false, error: err.message });
     }
 });
 

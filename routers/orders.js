@@ -1,18 +1,14 @@
-// Libs
-const { Order } = require('../models/order');
-const { OrderItem } = require('../models/order-item'); 
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
-const productsRoutes = require('./routes/orders');
-app.use('/api/v1/products', ordersRoutes);
-
+const Order = require('../models/order');
+const OrderItem = require('../models/order-item');
 
 // Get, Put, Post, and Delete requests for Orders
 
 router.get('/', async (req, res) => {
     try {
-        const orderList = await Order.find().populate('user', 'name').sort({ 'dateOrdered': -1 });
+        const orderList = await Order.find().populate('user', 'name').sort({'dateOrdered': -1});
         if (!orderList) {
             return res.status(500).json({ success: false });
         }
@@ -45,6 +41,10 @@ router.get('/:id', async (req, res) => {
 });
 
 router.post('/', async (req, res) => {
+    if (!req.body.orderItems || !Array.isArray(req.body.orderItems)) {
+        return res.status(400).json({ success: false, message: 'Invalid order items data' });
+    }
+
     try {
         const orderItemsIds = await Promise.all(req.body.orderItems.map(async orderItem => {
             let newOrderItem = new OrderItem({
@@ -184,4 +184,3 @@ router.get('/get/userorders/:userid', async (req, res) => {
 });
 
 module.exports = router;
-
